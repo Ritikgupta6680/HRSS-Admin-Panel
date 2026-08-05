@@ -1,0 +1,122 @@
+.login-content {
+  --background: linear-gradient(
+    160deg,
+    var(--ion-color-primary-tint) 0%,
+    var(--ion-background-color, #fff) 45%
+  );
+}
+
+.login-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 24px 20px;
+  border-radius: 20px;
+  background: var(--ion-card-background, var(--ion-background-color, #fff));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 12%);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 700;
+}
+
+.login-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgb(84, 12, 12);
+  color: var(--ion-color-danger-shade);
+  font-size: 0.85rem;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 1.15rem;
+  }
+}
+
+.field {
+  margin-bottom: 16px;
+
+  ion-input {
+    --padding-start: 12px;
+    --border-radius: 12px;
+  }
+
+  ion-icon[slot='start'] {
+    margin-inline-end: 8px;
+    align-self: center;
+    color: var(--ion-color-medium);
+  }
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  padding-inline-start: 4px;
+  font-size: 0.78rem;
+}
+
+.toggle-password {
+  --padding-start: 6px;
+  --padding-end: 6px;
+  --color: var(--ion-color-medium);
+
+  height: 34px;
+  margin: 0;
+  align-self: center;
+}
+
+.submit-button {
+  --box-shadow: none;
+
+  margin-top: 8px;
+  height: 46px;
+  font-weight: 600;
+
+  ion-spinner {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.login-footer {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--ion-color-medium);
+}

@@ -1,0 +1,105 @@
+<ion-content class="login-content" [fullscreen]="true" [scrollY]="true">
+  <div class="login-shell">
+    <form class="login-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <header class="login-header">
+        <div class="brand-mark">HR</div>
+        <h1>Welcome back</h1>
+        <p>Sign in to the HRSS admin panel</p>
+      </header>
+
+      @if (errorMessage(); as message) {
+        <div class="login-alert" role="alert">
+          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="field">
+        <ion-input
+          formControlName="email"
+          type="email"
+          label="Email"
+          labelPlacement="floating"
+          fill="outline"
+          placeholder="admin@company.com"
+          autocomplete="username"
+          inputmode="email"
+          enterkeyhint="next"
+          [class.ion-invalid]="isInvalid('email')"
+          [class.ion-touched]="isInvalid('email')"
+        >
+          <ion-icon slot="start" name="mail-outline" aria-hidden="true"></ion-icon>
+        </ion-input>
+
+        @if (isInvalid('email')) {
+          <ion-note color="danger" class="field-error">
+            {{
+              form.controls.email.hasError('required')
+                ? 'Email is required.'
+                : 'Enter a valid email address.'
+            }}
+          </ion-note>
+        }
+      </div>
+
+      <div class="field">
+        <ion-input
+          formControlName="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          label="Password"
+          labelPlacement="floating"
+          fill="outline"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          enterkeyhint="go"
+          [class.ion-invalid]="isInvalid('password')"
+          [class.ion-touched]="isInvalid('password')"
+        >
+          <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+          <ion-button
+            slot="end"
+            fill="clear"
+            type="button"
+            class="toggle-password"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            (click)="togglePassword()"
+          >
+            <ion-icon
+              slot="icon-only"
+              [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"
+            ></ion-icon>
+          </ion-button>
+        </ion-input>
+
+        @if (isInvalid('password')) {
+          <ion-note color="danger" class="field-error">
+            {{
+              form.controls.password.hasError('required')
+                ? 'Password is required.'
+                : 'Password must be at least 6 characters.'
+            }}
+          </ion-note>
+        }
+      </div>
+
+      <ion-button
+        class="submit-button"
+        type="submit"
+        expand="block"
+        shape="round"
+        [disabled]="submitting()"
+      >
+        @if (submitting()) {
+          <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+          <span class="ion-padding-start">Signing in…</span>
+        } @else {
+          Sign in
+        }
+      </ion-button>
+
+      <footer class="login-footer">
+        <small>HRSS Admin Panel</small>
+      </footer>
+    </form>
+  </div>
+</ion-content>
