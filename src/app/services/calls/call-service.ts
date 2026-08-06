@@ -45,8 +45,6 @@ export class CallService {
   }
 
   private url(path: string): string {
-    console.log('apiUrl:', environment.apiUrl);
-    console.log('finalUrl:', `${environment.apiUrl}${path.startsWith('/') ? path : `/${path}`}`);
     return `${environment.apiUrl}${path.startsWith('/') ? path : `/${path}`}`;
   }
 
