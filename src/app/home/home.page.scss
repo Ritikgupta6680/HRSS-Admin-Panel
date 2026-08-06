@@ -28,12 +28,33 @@
   }
 }
 
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  @media (max-width: 560px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .company-search {
   --border-radius: 12px;
   --box-shadow: none;
   --background: var(--ion-card-background, #fff);
+  flex: 1;
   padding-inline: 0;
-  margin-bottom: 8px;
+}
+
+.create-button {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  flex-shrink: 0;
+  height: 40px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .company-grid {

@@ -181,6 +181,10 @@ export class HomePage {
     return days <= 30 ? `${days} day${days === 1 ? '' : 's'} left` : 'Active';
   }
 
+  createCompany(): void {
+    this.router.navigateByUrl('/companies/new');
+  }
+
   logout(): void {
     this.auth.logout();
     this.router.navigateByUrl('/login', { replaceUrl: true });

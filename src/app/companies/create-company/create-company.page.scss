@@ -1,0 +1,78 @@
+.create-content {
+  --background: var(--ion-color-light, #f4f5f8);
+}
+
+.form-shell {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgb(235 68 90 / 12%);
+  color: #b3253a;
+  font-size: 0.88rem;
+
+  ion-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+}
+
+.form-section {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--ion-card-background, #fff);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
+
+  h2 {
+    margin: 0 0 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ion-color-medium, #92949c);
+  }
+}
+
+.field-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.submit-button {
+  margin-top: 4px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .create-content {
+    --background: #121317;
+  }
+
+  .form-section {
+    background: #1c1e24;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 40%);
+  }
+}

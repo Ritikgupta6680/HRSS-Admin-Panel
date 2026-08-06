@@ -10,6 +10,39 @@ export interface ApiError {
   message: string;
 }
 
+/** Payload sent when registering a new company. */
+export interface CreateCompanyRequest {
+  name: string;
+  slug: string;
+  domain: string;
+  website: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+  registrationNumber: string;
+  taxId: string;
+  industry: string;
+  timezone: string;
+  currency: string;
+  plan: string;
+  logoUrl: string;
+  lat: number | null;
+  long: number | null;
+  /** ISO date — when the package starts. */
+  packageStartedOn: string;
+  /** ISO date — when the package expires. */
+  packageExpiresOn: string;
+}
+
+export interface CreateCompanyResponse {
+  id: string;
+  name: string;
+}
+
 /**
  * Single entry point for backend calls: prefixes the API base URL and normalizes
  * failures into `ApiError`. The bearer token is added by `authInterceptor`.
@@ -42,6 +75,10 @@ export class CallService {
     return this.http
       .delete<T>(this.url(path), { headers: this.headers() })
       .pipe(catchError((error) => this.handleError(error)));
+  }
+
+  createCompany(company: CreateCompanyRequest): Observable<CreateCompanyResponse> {
+    return this.post<CreateCompanyResponse>('/api/SuperAdmin/add-company', company);
   }
 
   private url(path: string): string {

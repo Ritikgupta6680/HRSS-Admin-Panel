@@ -1,0 +1,381 @@
+
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>New company</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="create-content">
+  <form class="form-shell" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage(); as message) {
+      <div class="form-alert" role="alert">
+        <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    <section class="form-section">
+      <h2>Company details</h2>
+
+      <div class="field-grid">
+        <div class="field">
+          <ion-input
+            formControlName="name"
+            label="Company name *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="Nimbus Technologies"
+            [class.ion-invalid]="isInvalid('name')"
+            [class.ion-touched]="isInvalid('name')"
+          ></ion-input>
+          @if (isInvalid('name')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('name') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="slug"
+            label="Slug *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="nimbus-technologies"
+            [class.ion-invalid]="isInvalid('slug')"
+            [class.ion-touched]="isInvalid('slug')"
+          ></ion-input>
+          @if (isInvalid('slug')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('slug') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="domain"
+            label="Domain *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="nimbus.com"
+            inputmode="url"
+            [class.ion-invalid]="isInvalid('domain')"
+            [class.ion-touched]="isInvalid('domain')"
+          ></ion-input>
+          @if (isInvalid('domain')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('domain') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="website"
+            label="Website"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="https://nimbus.com"
+            inputmode="url"
+            [class.ion-invalid]="isInvalid('website')"
+            [class.ion-touched]="isInvalid('website')"
+          ></ion-input>
+          @if (isInvalid('website')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('website') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="industry"
+            label="Industry"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="Information Technology"
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="logoUrl"
+            label="Logo URL"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="https://cdn.nimbus.com/logo.png"
+            inputmode="url"
+            [class.ion-invalid]="isInvalid('logoUrl')"
+            [class.ion-touched]="isInvalid('logoUrl')"
+          ></ion-input>
+          @if (isInvalid('logoUrl')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('logoUrl') }}</ion-note>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Contact</h2>
+
+      <div class="field-grid">
+        <div class="field">
+          <ion-input
+            formControlName="email"
+            type="email"
+            label="Email *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="admin@nimbus.com"
+            inputmode="email"
+            [class.ion-invalid]="isInvalid('email')"
+            [class.ion-touched]="isInvalid('email')"
+          ></ion-input>
+          @if (isInvalid('email')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('email') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="phone"
+            type="tel"
+            label="Phone *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="+91 98765 43210"
+            inputmode="tel"
+            [class.ion-invalid]="isInvalid('phone')"
+            [class.ion-touched]="isInvalid('phone')"
+          ></ion-input>
+          @if (isInvalid('phone')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('phone') }}</ion-note>
+          }
+        </div>
+
+        <div class="field field-wide">
+          <ion-input
+            formControlName="address"
+            label="Address *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="Street, building, unit"
+            [class.ion-invalid]="isInvalid('address')"
+            [class.ion-touched]="isInvalid('address')"
+          ></ion-input>
+          @if (isInvalid('address')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('address') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="city"
+            label="City *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="Jaipur"
+            [class.ion-invalid]="isInvalid('city')"
+            [class.ion-touched]="isInvalid('city')"
+          ></ion-input>
+          @if (isInvalid('city')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('city') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="state"
+            label="State *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="Rajasthan"
+            [class.ion-invalid]="isInvalid('state')"
+            [class.ion-touched]="isInvalid('state')"
+          ></ion-input>
+          @if (isInvalid('state')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('state') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="country"
+            label="Country *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="India"
+            [class.ion-invalid]="isInvalid('country')"
+            [class.ion-touched]="isInvalid('country')"
+          ></ion-input>
+          @if (isInvalid('country')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('country') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="zipCode"
+            label="Zip code *"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="302001"
+            inputmode="numeric"
+            [class.ion-invalid]="isInvalid('zipCode')"
+            [class.ion-touched]="isInvalid('zipCode')"
+          ></ion-input>
+          @if (isInvalid('zipCode')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('zipCode') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="lat"
+            type="number"
+            label="Latitude"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="26.9124"
+            [class.ion-invalid]="isInvalid('lat')"
+            [class.ion-touched]="isInvalid('lat')"
+          ></ion-input>
+          @if (isInvalid('lat')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('lat') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="long"
+            type="number"
+            label="Longitude"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="75.7873"
+            [class.ion-invalid]="isInvalid('long')"
+            [class.ion-touched]="isInvalid('long')"
+          ></ion-input>
+          @if (isInvalid('long')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('long') }}</ion-note>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Legal &amp; localisation</h2>
+
+      <div class="field-grid">
+        <div class="field">
+          <ion-input
+            formControlName="registrationNumber"
+            label="Registration number"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="U72900RJ2021PTC000000"
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="taxId"
+            label="Tax ID"
+            labelPlacement="floating"
+            fill="outline"
+            placeholder="08AAACN0000A1Z5"
+          ></ion-input>
+        </div>
+
+        <div class="field">
+          <ion-select
+            formControlName="timezone"
+            label="Timezone *"
+            labelPlacement="floating"
+            fill="outline"
+            interface="popover"
+          >
+            @for (zone of timezones; track zone) {
+              <ion-select-option [value]="zone">{{ zone }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="field">
+          <ion-select
+            formControlName="currency"
+            label="Currency *"
+            labelPlacement="floating"
+            fill="outline"
+            interface="popover"
+          >
+            @for (code of currencies; track code) {
+              <ion-select-option [value]="code">{{ code }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Subscription</h2>
+
+      <div class="field-grid">
+        <div class="field">
+          <ion-select
+            formControlName="plan"
+            label="Plan *"
+            labelPlacement="floating"
+            fill="outline"
+            interface="popover"
+          >
+            @for (planOption of plans; track planOption) {
+              <ion-select-option [value]="planOption">{{ planOption }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="packageStartedOn"
+            type="date"
+            label="Package starts on *"
+            labelPlacement="stacked"
+            fill="outline"
+            [class.ion-invalid]="isInvalid('packageStartedOn')"
+            [class.ion-touched]="isInvalid('packageStartedOn')"
+          ></ion-input>
+          @if (isInvalid('packageStartedOn')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('packageStartedOn') }}</ion-note>
+          }
+        </div>
+
+        <div class="field">
+          <ion-input
+            formControlName="packageExpiresOn"
+            type="date"
+            label="Package expires on *"
+            labelPlacement="stacked"
+            fill="outline"
+            [class.ion-invalid]="isInvalid('packageExpiresOn')"
+            [class.ion-touched]="isInvalid('packageExpiresOn')"
+          ></ion-input>
+          @if (isInvalid('packageExpiresOn')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('packageExpiresOn') }}</ion-note>
+          }
+        </div>
+      </div>
+    </section>
+
+    <ion-button
+      class="submit-button"
+      type="submit"
+      expand="block"
+      shape="round"
+      [disabled]="submitting()"
+    >
+      @if (submitting()) {
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <span class="ion-padding-start">Creating…</span>
+      } @else {
+        Create company
+      }
+    </ion-button>
+  </form>
+</ion-content>

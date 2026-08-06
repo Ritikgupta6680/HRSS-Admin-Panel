@@ -1,6 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>HRSS Admin</ion-title>
+    <!-- <ion-button slot="end" fill="clear" aria-label="Create a new company" (click)="createCompany()">
+      <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+    </ion-button> -->
     <ion-button slot="end" fill="clear" aria-label="Sign out" (click)="logout()">
       <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
     </ion-button>
@@ -22,12 +25,19 @@
       </div>
     </header> -->
 
-    <ion-searchbar
-      class="company-search"
-      placeholder="Search by name or phone"
-      [debounce]="200"
-      (ionInput)="search($any($event).detail.value ?? '')"
-    ></ion-searchbar>
+    <div class="toolbar-row">
+      <ion-searchbar
+        class="company-search"
+        placeholder="Search by name or phone"
+        [debounce]="200"
+        (ionInput)="search($any($event).detail.value ?? '')"
+      ></ion-searchbar>
+
+      <ion-button class="create-button" shape="round" (click)="createCompany()">
+        <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        New company
+      </ion-button>
+    </div>
 
     @if (visibleCompanies().length === 0) {
       <div class="empty-state">
