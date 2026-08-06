@@ -33,6 +33,8 @@ log.txt
 node_modules
 npm-debug.log
 yarn-error.log
+.vscode
+.angular
 
 # IDEs and editors
 .idea/
@@ -68,3 +70,4 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+node_modules
