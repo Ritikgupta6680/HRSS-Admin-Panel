@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { StorageSrevice } from '../storage/storage-srevice';
+import { StorageService } from '../storage/storage-srevice';
 
 /** Error shape every caller can rely on, regardless of what the backend returned. */
 export interface ApiError {
@@ -20,7 +20,7 @@ export interface ApiError {
 })
 export class CallService {
   private readonly http = inject(HttpClient);
-  private readonly storage = inject(StorageSrevice);
+  private readonly storage = inject(StorageService);
 
   get<T>(path: string): Observable<T> {
     return this.http

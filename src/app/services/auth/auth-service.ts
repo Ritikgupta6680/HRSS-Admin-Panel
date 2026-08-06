@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { CallService } from '../calls/call-service';
-import { StorageSrevice } from '../storage/storage-srevice';
+import { StorageService } from '../storage/storage-srevice';
 
 export interface LoginCredentials {
   email: string;
@@ -26,7 +26,7 @@ export interface LoginResponse {
 })
 export class AuthService {
   private readonly api = inject(CallService);
-  private readonly storage = inject(StorageSrevice);
+  private readonly storage = inject(StorageService);
 
   // Seeded from storage so a page refresh keeps the user signed in.
   private readonly token = signal<string | null>(this.storage.getToken());

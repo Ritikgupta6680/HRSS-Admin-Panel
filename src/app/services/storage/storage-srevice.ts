@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
+import { CookieService } from 'ngx-cookie-service';
 
 const TOKEN_KEY = 'hrss.token';
 const USER_KEY = 'hrss.user';
 
-/**
- * Thin wrapper over localStorage so the rest of the app never touches the
- * storage API directly. Every read is defensive: a webview with storage
- * disabled, or a corrupted value, must not break bootstrap.
- */
 @Injectable({
   providedIn: 'root',
 })
-export class StorageSrevice {
+export class StorageService {
+
+  constructor(private cookieService: CookieService) { }
+
   getToken(): string | null {
     return this.read(TOKEN_KEY);
   }
@@ -22,6 +21,7 @@ export class StorageSrevice {
 
   getUser<T>(): T | null {
     const raw = this.read(USER_KEY);
+
     if (!raw) {
       return null;
     }
@@ -45,7 +45,9 @@ export class StorageSrevice {
 
   private read(key: string): string | null {
     try {
-      return localStorage.getItem(key);
+      return this.cookieService.check(key)
+        ? this.cookieService.get(key)
+        : null;
     } catch {
       return null;
     }
@@ -53,17 +55,25 @@ export class StorageSrevice {
 
   private write(key: string, value: string): void {
     try {
-      localStorage.setItem(key, value);
+      this.cookieService.set(
+        key,
+        value,
+        7,          // Expiry in days
+        '/',        // Path
+        undefined,  // Domain
+        true,       // Secure (HTTPS only)
+        'Lax'       // SameSite
+      );
     } catch {
-      // Storage unavailable (private mode / quota) — session stays in memory only.
+      // Ignore errors
     }
   }
 
   private remove(key: string): void {
     try {
-      localStorage.removeItem(key);
+      this.cookieService.delete(key, '/');
     } catch {
-      // Nothing to do.
+      // Ignore errors
     }
   }
 }
