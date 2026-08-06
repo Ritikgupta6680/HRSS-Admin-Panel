@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { StorageService } from '../storage/storage-srevice';
 
 /** Error shape every caller can rely on, regardless of what the backend returned. */
 export interface ApiError {
@@ -12,15 +11,14 @@ export interface ApiError {
 }
 
 /**
- * Single entry point for backend calls: prefixes the API base URL, attaches the
- * bearer token when present, and normalizes failures into `ApiError`.
+ * Single entry point for backend calls: prefixes the API base URL and normalizes
+ * failures into `ApiError`. The bearer token is added by `authInterceptor`.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class CallService {
   private readonly http = inject(HttpClient);
-  private readonly storage = inject(StorageService);
 
   get<T>(path: string): Observable<T> {
     return this.http
@@ -50,15 +48,9 @@ export class CallService {
     return `${environment.apiUrl}${path.startsWith('/') ? path : `/${path}`}`;
   }
 
+  // The session token is added by `authInterceptor`, not here.
   private headers(): HttpHeaders {
-    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const token = this.storage.getToken();
-
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
+    return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

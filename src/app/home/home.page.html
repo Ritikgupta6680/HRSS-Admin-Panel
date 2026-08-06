@@ -1,20 +1,93 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>HRSS Admin</ion-title>
+    <ion-button slot="end" fill="clear" aria-label="Sign out" (click)="logout()">
+      <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+    </ion-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="home-content">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Companies</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="page">
+    <!-- <header class="page-head">
+      <div>
+        <h2>Registered companies</h2>
+        <p>{{ visibleCompanies().length }} of {{ totalCompanies() }} companies</p>
+      </div>
+    </header> -->
+
+    <ion-searchbar
+      class="company-search"
+      placeholder="Search by name or phone"
+      [debounce]="200"
+      (ionInput)="search($any($event).detail.value ?? '')"
+    ></ion-searchbar>
+
+    @if (visibleCompanies().length === 0) {
+      <div class="empty-state">
+        <ion-icon name="business-outline" aria-hidden="true"></ion-icon>
+        <strong>No companies found</strong>
+        <p>Try a different search term.</p>
+      </div>
+    } @else {
+      <div class="company-grid">
+        @for (company of visibleCompanies(); track company.id) {
+          <article class="company-card">
+            <div class="card-top">
+              <div class="logo">
+                @if (company.logoUrl) {
+                  <img [src]="company.logoUrl" [alt]="company.name + ' logo'" />
+                } @else {
+                  <span>{{ initials(company.name) }}</span>
+                }
+              </div>
+
+              <div class="identity">
+                <h3>{{ company.name }}</h3>
+                <a class="phone" [href]="'tel:' + company.phone">
+                  <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                  {{ company.phone }}
+                </a>
+              </div>
+
+              <span class="plan-badge" [attr.data-plan]="company.planType">
+                <ion-icon name="ribbon-outline" aria-hidden="true"></ion-icon>
+                {{ company.planType }}
+              </span>
+            </div>
+
+            <dl class="card-meta">
+              <div class="meta-item">
+                <dt>
+                  <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+                  Valid till
+                </dt>
+                <dd>{{ company.validTill | date: 'dd MMM yyyy' }}</dd>
+              </div>
+
+              <div class="meta-item">
+                <dt>
+                  <ion-icon name="cart-outline" aria-hidden="true"></ion-icon>
+                  Purchased on
+                </dt>
+                <dd>{{ company.purchasedOn | date: 'dd MMM yyyy' }}</dd>
+              </div>
+            </dl>
+
+            <footer class="card-foot">
+              <span class="status" [attr.data-state]="expiryState(company.validTill)">
+                {{ expiryLabel(company.validTill) }}
+              </span>
+            </footer>
+          </article>
+        }
+      </div>
+    }
   </div>
 </ion-content>
