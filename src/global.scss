@@ -35,3 +35,19 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+.package-modal::part(content) {
+    backdrop-filter: blur(8px);
+    --width: min(92vw, 720px);
+    --max-width: 720px;
+    --height: auto;
+    --border-radius: 28px;
+    --box-shadow: 0 32px 80px rgb(0 0 0 / 55%);
+    background: transparent;
+}
+
+.package-modal::part(backdrop) {
+    background: rgb(4 6 10 / 74%);
+    backdrop-filter: blur(8px);
+    opacity: 1;
+}

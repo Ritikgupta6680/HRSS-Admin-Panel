@@ -1,0 +1,106 @@
+<div class="modal-shell">
+  <div class="modal-hero">
+    <div>
+      <h3>{{ type === 'view' ? 'View package' : type === 'edit' ? 'Edit package' : 'Create package' }}</h3>
+      <p>
+        {{ type === 'view' ? 'Review the package details in read-only mode.' : type === 'edit' ? 'Update the package details and pricing.' : 'Define a new package with pricing and limits.' }}
+      </p>
+    </div>
+
+    <ion-button fill="clear" class="close-button" type="button" (click)="cancel()">
+      {{ type === 'view' ? 'Close' : 'Cancel' }}
+    </ion-button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="modal-form">
+    <div>
+      
+
+      <ion-item class="field-item">
+        <ion-input label="Package Name" labelPlacement="stacked" formControlName="name" placeholder="Premium" [readonly]="type === 'view'">
+        </ion-input>
+      </ion-item>
+
+      <ion-item class="field-item">
+        <ion-input type="number" label="Maximum Employees" labelPlacement="stacked" formControlName="numberOfEmployees" placeholder="100" [readonly]="type === 'view'">
+        </ion-input>
+      </ion-item>
+
+      <div class="row">
+        <ion-item class="field-item">
+          <ion-input type="number" label="Price" labelPlacement="stacked" formControlName="price" placeholder="999" [readonly]="type === 'view'">
+          </ion-input>
+        </ion-item>
+
+        <ion-item class="field-item">
+          @if (type === 'view') {
+            <ion-input label="Currency" labelPlacement="stacked" formControlName="currency" [readonly]="type === 'view'">
+            </ion-input>
+          }@else{
+          <ion-select label="Currency" labelPlacement="stacked" formControlName="currency">
+            <ion-select-option value="INR">INR</ion-select-option>
+            <ion-select-option value="USD">USD</ion-select-option>
+            <ion-select-option value="EUR">EUR</ion-select-option>
+          </ion-select>
+        }
+        </ion-item>
+      </div>
+
+      <ion-item lines="none" class="toggle-item">
+        <div>
+          <ion-label>Active Package</ion-label>
+          <p>Visible to admins when enabled.</p>
+        </div>
+
+        <ion-toggle slot="end" formControlName="isActive" [disabled]="type === 'view'"></ion-toggle>
+      </ion-item>
+    </div>
+
+    @if (type !== 'create' && package) {
+    <div class="companies">
+      <div class="companies-head">
+        <div>
+          <p class="companies-kicker">Customer footprint</p>
+          <h4>Associated Companies</h4>
+        </div>
+
+        <span class="companies-count">{{ package.totalCompanies }}</span>
+      </div>
+
+      @if (package.companies.length === 0) {
+      <p class="no-companies">No companies are currently associated with this package.</p>
+      } @else {
+      <ul class="companies-list">
+        @for (company of package.companies; track company.id) {
+        <li>
+          <span class="company-badge">{{ company.name.slice(0, 1) }}</span>
+          <span>{{ company.name }}</span>
+        </li>
+        }
+      </ul>
+      }
+
+      <div class="companies-meta">
+        <div>
+          <span>Last Updated</span>
+          <strong>{{ app.formatIndianDate(package.updatedAt) }}</strong>
+        </div>
+      </div>
+    </div>
+    }
+
+    <div class="actions" [class.actions--single]="type === 'view'">
+      <ion-button fill="outline" color="medium" type="button" (click)="cancel()">
+        {{ type === 'view' ? 'Close' : 'Cancel' }}
+      </ion-button>
+      <!-- <ion-button color="danger" type="button" (click)="delete()" [disabled]="type === 'view' ||type === 'create'">
+        Delete Package
+      </ion-button> -->
+      @if (type !== 'view') {
+      <ion-button type="submit" [disabled]="form.invalid">
+        {{ type === 'edit' ? 'Update Package' : 'Save Package' }}
+      </ion-button>
+      }
+    </div>
+  </form>
+</div>

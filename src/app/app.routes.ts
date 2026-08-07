@@ -9,6 +9,10 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'packages',
+    loadComponent: () => import('./pages/packages/packages.page').then(m => m.PackagesPage)
+  },
+  {
     path: 'login',
     canActivate: [guestGuard],
     loadComponent: () => import('./auth/login/login.component').then((m) => m.LoginComponent),
@@ -22,4 +26,5 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'login',
   },
+
 ];
