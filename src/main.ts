@@ -3,7 +3,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 
-import { authInterceptor } from './app/interceptors/auth-interceptor';
+import { authInterceptor } from './app/services/interceptors/auth-interceptor';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { isDevMode } from '@angular/core';
@@ -15,8 +15,8 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes, withPreloading(PreloadAllModules)), provideServiceWorker('ngsw-worker.js', {
-            enabled: !isDevMode(),
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
 });

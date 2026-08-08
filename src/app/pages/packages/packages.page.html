@@ -1,0 +1,154 @@
+<ion-content [fullscreen]="true" class="packages-content">
+  <ion-header [translucent]="true">
+    <ion-toolbar>
+      <ion-title>HRSS Admin</ion-title>
+      <ion-button slot="end" fill="clear" aria-label="Sign out" (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-toolbar>
+  </ion-header>
+@if (loading) {
+  @for (loop of skeletonLoop; track loop) {
+<ion-list>
+  <ion-list-header>
+    <ion-skeleton-text [animated]="true" style="width: 80px"></ion-skeleton-text>
+  </ion-list-header>
+  <ion-item>
+    <ion-thumbnail slot="start">
+      <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+    </ion-thumbnail>
+    <ion-label>
+      <h3>
+        <ion-skeleton-text [animated]="true" style="width: 80%;"></ion-skeleton-text>
+      </h3>
+      <p>
+        <ion-skeleton-text [animated]="true" style="width: 60%;"></ion-skeleton-text>
+      </p>
+      <p>
+        <ion-skeleton-text [animated]="true" style="width: 30%;"></ion-skeleton-text>
+      </p>
+    </ion-label>
+  </ion-item>
+</ion-list>
+  }
+}
+@else {
+  <div class="page">
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Total packages</span>
+        <strong>{{ totalPackages() }}</strong>
+        <p>All packages currently available.</p>
+      </article>
+
+      <article class="stat-card accent">
+        <span class="stat-label">Active packages</span>
+        <strong>{{ activePackages() }}</strong>
+        <p>Enabled for customers right now.</p>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Employee capacity</span>
+        <strong>{{ totalEmployees() }}</strong>
+        <p>Total employees covered by all plans.</p>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Total value</span>
+        <strong>{{ totalValue() }}</strong>
+        <p>Combined package price value.</p>
+      </article>
+    </section>
+
+    <ion-searchbar class="package-search" placeholder="Search package name, price, employees, or currency" [debounce]="200"
+      (ionInput)="search($any($event).detail.value ?? '')"></ion-searchbar>
+
+    @if (visiblePackages().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="pricetag-outline" aria-hidden="true"></ion-icon>
+      <strong>No packages found</strong>
+      <p>Try another search term or add a new package.</p>
+    </div>
+    } @else {
+    <div class="package-grid">
+      @for (item of visiblePackages(); track item.id) {
+      <article class="package-card">
+        <div class="card-top">
+          <div class="package-mark">
+            <ion-icon name="pricetag-outline" aria-hidden="true"></ion-icon>
+          </div>
+
+          <div class="identity">
+            <h3>{{ item.name }}</h3>
+            <p>{{ formattedPrice(item) }}</p>
+          </div>
+
+          <span class="status" [attr.data-state]="statusState(item)">
+            {{ statusLabel(item) }}
+          </span>
+        </div>
+
+        <dl class="card-meta">
+          <div class="meta-item">
+            <dt>
+              <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+              Employees
+            </dt>
+            <dd>{{ item.numberOfEmployees }}</dd>
+          </div>
+
+          <div class="meta-item">
+            <dt>
+              <ion-icon name="briefcase-outline" aria-hidden="true"></ion-icon>
+              Used by
+            </dt>
+            <dd>{{ item.totalCompanies }} companies</dd>
+          </div>
+        </dl>
+
+        <footer class="card-foot">
+          <ion-button fill="clear" size="small" (click)="openView(item.id)">
+            <ion-icon slot="start" name="eye-outline"></ion-icon>
+            View
+          </ion-button>
+
+          <ion-button fill="clear" size="small" (click)="openEdit(item.id)">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Edit
+          </ion-button>
+        </footer>
+      </article>
+      }
+    </div>
+    }
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="openAdd()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+}
+</ion-content>
+@if(!loading) {
+<ion-modal  cssClass="package-modal" [isOpen]="modalMode() !== ModalMode.None" (didDismiss)="closeModal()">
+
+  <ng-template>
+
+    @if (modalMode() !== ModalMode.None) {
+
+    <app-package-add [packageId]="selectedPackage()" [type]="
+          modalMode() === ModalMode.Add
+            ? 'create'
+            : modalMode() === ModalMode.Edit
+              ? 'edit'
+              : 'view'
+        " (close)="closeModal()" (savePackage)="handleCreate($event)" (updatePackage)="handleUpdate($event)" (deletePackage)="handleDelete($event)">
+    </app-package-add>
+
+    }
+
+  </ng-template>
+
+</ion-modal>
+}

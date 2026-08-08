@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 
-import { environment } from '../../environments/environment';
-import { StorageService } from '../services/storage/storage-srevice';
+import { environment } from '../../../environments/environment';
+import { StorageService } from '../storage/storage-srevice';
 
 /** Endpoints that must go out without a session token. */
 const PUBLIC_PATHS = ['/api/SuperAdmin/login'];

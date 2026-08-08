@@ -53,6 +53,7 @@ export interface CreateCompanyResponse {
 export class CallService {
   private readonly http = inject(HttpClient);
 
+
   get<T>(path: string): Observable<T> {
     return this.http
       .get<T>(this.url(path), { headers: this.headers() })

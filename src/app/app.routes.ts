@@ -8,11 +8,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
   },
+
   {
     path: 'companies/new',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./companies/create-company/create-company.page').then((m) => m.CreateCompanyPage),
+  },
+  {
+    path: 'packages',
+    loadComponent: () => import('./pages/packages/packages.page').then(m => m.PackagesPage)
   },
   {
     path: 'login',
@@ -28,4 +33,5 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'login',
   },
+
 ];
