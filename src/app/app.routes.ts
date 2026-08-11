@@ -16,6 +16,12 @@ export const routes: Routes = [
       import('./companies/create-company/create-company.page').then((m) => m.CreateCompanyPage),
   },
   {
+    path: 'users/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./users/create-user/create-user.page').then((m) => m.CreateUserPage),
+  },
+  {
     path: 'packages',
     loadComponent: () => import('./pages/packages/packages.page').then(m => m.PackagesPage)
   },

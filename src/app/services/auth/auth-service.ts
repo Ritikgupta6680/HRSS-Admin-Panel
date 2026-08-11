@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 
 import { CallService } from '../calls/call-service';
 import { StorageService } from '../storage/storage-srevice';
@@ -27,6 +28,7 @@ export interface LoginResponse {
 export class AuthService {
   private readonly api = inject(CallService);
   private readonly storage = inject(StorageService);
+  private readonly router = inject(Router);
 
   // Seeded from storage so a page refresh keeps the user signed in.
   private readonly token = signal<string | null>(this.storage.getToken());
@@ -45,6 +47,7 @@ export class AuthService {
     this.storage.clear();
     this.token.set(null);
     this.currentUser.set(null);
+    this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   private startSession(response: LoginResponse): void {

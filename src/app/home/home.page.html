@@ -37,13 +37,30 @@
         <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
         New company
       </ion-button>
+
+      <ion-button class="create-button" shape="round" fill="outline" (click)="createUser()">
+        <ion-icon slot="start" name="person-add-outline" aria-hidden="true"></ion-icon>
+        New user
+      </ion-button>
     </div>
 
-    @if (visibleCompanies().length === 0) {
+    @if (loading()) {
+      <div class="empty-state">
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <strong>Loading companies…</strong>
+      </div>
+    } @else if (errorMessage(); as message) {
+      <div class="empty-state" role="alert">
+        <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+        <strong>Could not load companies</strong>
+        <p>{{ message }}</p>
+        <ion-button fill="outline" shape="round" (click)="loadCompanies()">Retry</ion-button>
+      </div>
+    } @else if (visibleCompanies().length === 0) {
       <div class="empty-state">
         <ion-icon name="business-outline" aria-hidden="true"></ion-icon>
         <strong>No companies found</strong>
-        <p>Try a different search term.</p>
+        <p>{{ totalCompanies() ? 'Try a different search term.' : 'Create your first company to get started.' }}</p>
       </div>
     } @else {
       <div class="company-grid">
@@ -60,10 +77,12 @@
 
               <div class="identity">
                 <h3>{{ company.name }}</h3>
-                <a class="phone" [href]="'tel:' + company.phone">
-                  <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
-                  {{ company.phone }}
-                </a>
+                @if (company.phone) {
+                  <a class="phone" [href]="'tel:' + company.phone">
+                    <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                    {{ company.phone }}
+                  </a>
+                }
               </div>
 
               <span class="plan-badge" [attr.data-plan]="company.planType">

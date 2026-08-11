@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -7,87 +7,24 @@ import {
   IonHeader,
   IonIcon,
   IonSearchbar,
+  IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
+  alertCircleOutline,
   businessOutline,
   calendarClearOutline,
   callOutline,
   cartOutline,
   logOutOutline,
+  personAddOutline,
   ribbonOutline,
 } from 'ionicons/icons';
 
 import { AuthService } from '../services/auth/auth-service';
-
-export type PlanType = 'Basic' | 'Standard' | 'Premium' | 'Enterprise';
-
-export interface Company {
-  id: string;
-  name: string;
-  /** Optional remote logo; the card falls back to an initials monogram. */
-  logoUrl?: string;
-  phone: string;
-  planType: PlanType;
-  /** ISO date — when the current plan expires. */
-  validTill: string;
-  /** ISO date — when the current plan was bought. */
-  purchasedOn: string;
-}
-
-/** Placeholder list until the companies API is wired up. */
-const MOCK_COMPANIES: Company[] = [
-  {
-    id: 'c-1001',
-    name: 'Nimbus Technologies',
-    phone: '+91 98765 43210',
-    planType: 'Enterprise',
-    validTill: '2027-03-31',
-    purchasedOn: '2026-04-01',
-  },
-  {
-    id: 'c-1002',
-    name: 'Orbit Logistics',
-    phone: '+91 91234 56780',
-    planType: 'Premium',
-    validTill: '2026-11-15',
-    purchasedOn: '2025-11-16',
-  },
-  {
-    id: 'c-1003',
-    name: 'Vertex Healthcare',
-    phone: '+91 99887 76655',
-    planType: 'Standard',
-    validTill: '2026-08-28',
-    purchasedOn: '2025-08-29',
-  },
-  {
-    id: 'c-1004',
-    name: 'Bluepeak Retail',
-    phone: '+91 90011 22334',
-    planType: 'Basic',
-    validTill: '2026-08-12',
-    purchasedOn: '2026-02-12',
-  },
-  {
-    id: 'c-1005',
-    name: 'Ironclad Manufacturing',
-    phone: '+91 93456 12098',
-    planType: 'Premium',
-    validTill: '2026-06-30',
-    purchasedOn: '2025-07-01',
-  },
-  {
-    id: 'c-1006',
-    name: 'Larkspur Media House',
-    phone: '+91 97654 32109',
-    planType: 'Standard',
-    validTill: '2027-01-09',
-    purchasedOn: '2026-01-10',
-  },
-];
+import { ApiError, CallService, Company } from '../services/calls/call-service';
 
 @Component({
   selector: 'app-home',
@@ -102,17 +39,21 @@ const MOCK_COMPANIES: Company[] = [
     IonIcon,
     IonButton,
     IonSearchbar,
+    IonSpinner,
   ],
 })
-export class HomePage {
+export class HomePage implements OnInit {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly api = inject(CallService);
+  private readonly router = inject(Router)
 
   readonly user = this.auth.user;
 
-  // TODO: replace with the companies API once it exists.
-  private readonly companies = signal<Company[]>(MOCK_COMPANIES);
+  private readonly companies = signal<Company[]>([]);
   private readonly query = signal('');
+
+  readonly loading = signal(false);
+  readonly errorMessage = signal<string | null>(null);
 
   readonly totalCompanies = computed(() => this.companies().length);
 
@@ -133,12 +74,40 @@ export class HomePage {
 
   constructor() {
     addIcons({
+      alertCircleOutline,
       businessOutline,
       callOutline,
       ribbonOutline,
       calendarClearOutline,
       cartOutline,
       logOutOutline,
+      personAddOutline,
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadCompanies();
+  }
+
+  /** Fills the card grid from the backend. */
+  loadCompanies(): void {
+    if (this.loading()) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    this.api.get_companyies_list().subscribe({
+      next: (companies) => {
+        this.loading.set(false);
+        this.companies.set(companies);
+      },
+      error: (error: ApiError) => {
+        this.loading.set(false);
+        this.companies.set([]);
+        this.errorMessage.set(error.message ?? 'Unable to load companies.');
+      },
     });
   }
 
@@ -170,6 +139,11 @@ export class HomePage {
   expiryLabel(validTill: string): string {
     const days = this.daysLeft(validTill);
 
+    // The backend may omit the date entirely.
+    if (Number.isNaN(days)) {
+      return '—';
+    }
+
     if (days < 0) {
       return 'Expired';
     }
@@ -185,9 +159,13 @@ export class HomePage {
     this.router.navigateByUrl('/companies/new');
   }
 
+  createUser(): void {
+    this.router.navigateByUrl('/users/new');
+  }
+
   logout(): void {
     this.auth.logout();
-    this.router.navigateByUrl('/login', { replaceUrl: true });
+
   }
 
   private daysLeft(validTill: string): number {

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -20,11 +20,18 @@ import {
 import { addIcons } from 'ionicons';
 import { alertCircleOutline } from 'ionicons/icons';
 
-import { ApiError, CallService } from '../../services/calls/call-service';
+import {
+  ApiError,
+  CallService,
+  CreateCompanyRequest,
+  PlanDetails,
+} from '../../services/calls/call-service';
 
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// Dots are allowed so a domain can be used as the slug.
+const SLUG_PATTERN = /^[a-z0-9]+(?:[-.][a-z0-9]+)*$/;
 const DOMAIN_PATTERN = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
-const URL_PATTERN = /^https?:\/\/.+/i;
+// The protocol is optional — the backend accepts bare hosts like `www.acme.com`.
+const URL_PATTERN = /^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i;
 const PHONE_PATTERN = /^\+?[0-9 ()-]{7,20}$/;
 
 @Component({
@@ -48,13 +55,12 @@ const PHONE_PATTERN = /^\+?[0-9 ()-]{7,20}$/;
     IonSpinner,
   ],
 })
-export class CreateCompanyPage {
+export class CreateCompanyPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(CallService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastController);
 
-  readonly plans = ['Basic', 'Standard', 'Premium', 'Enterprise'];
   readonly currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD'];
   readonly timezones = [
     'Asia/Kolkata',
@@ -81,9 +87,9 @@ export class CreateCompanyPage {
     registrationNumber: [''],
     taxId: [''],
     industry: [''],
-    timezone: ['Asia/Kolkata', [Validators.required]],
+    timeZone: ['Asia/Kolkata', [Validators.required]],
     currency: ['INR', [Validators.required]],
-    plan: ['Basic', [Validators.required]],
+    packageId: ['', [Validators.required]],
     logoUrl: ['', [Validators.pattern(URL_PATTERN)]],
     lat: [null as number | null, [Validators.min(-90), Validators.max(90)]],
     long: [null as number | null, [Validators.min(-180), Validators.max(180)]],
@@ -93,6 +99,10 @@ export class CreateCompanyPage {
 
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly plans = signal<PlanDetails[]>([]);
+  readonly plansLoading = signal(false);
+  readonly plansError = signal<string | null>(null);
 
   constructor() {
     addIcons({ alertCircleOutline });
@@ -104,6 +114,38 @@ export class CreateCompanyPage {
       if (!slug.dirty) {
         slug.setValue(this.toSlug(name), { emitEvent: false });
       }
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadPlans();
+  }
+
+  /** Fills the plan dropdown from the backend. */
+  loadPlans(): void {
+    if (this.plansLoading()) {
+      return;
+    }
+
+    this.plansLoading.set(true);
+    this.plansError.set(null);
+
+    this.api.get_plan_Details().subscribe({
+      next: (plans) => {
+        this.plansLoading.set(false);
+        this.plans.set(plans);
+
+        const selected = this.form.controls.packageId.value;
+
+        // Keep any existing choice; otherwise preselect the first plan.
+        if (plans.length && !plans.some((plan) => plan.id === selected)) {
+          this.form.controls.packageId.setValue(plans[0].id);
+        }
+      },
+      error: (error: ApiError) => {
+        this.plansLoading.set(false);
+        this.plansError.set(error.message ?? 'Unable to load plans.');
+      },
     });
   }
 
@@ -135,13 +177,13 @@ export class CreateCompanyPage {
     if (control.hasError('pattern')) {
       switch (field) {
         case 'slug':
-          return 'Use lowercase letters, numbers and hyphens only.';
+          return 'Use lowercase letters, numbers, hyphens and dots only.';
         case 'domain':
           return 'Enter a valid domain, e.g. company.com.';
         case 'phone':
           return 'Enter a valid phone number.';
         default:
-          return 'Enter a valid URL starting with http:// or https://.';
+          return 'Enter a valid URL, e.g. company.com or https://company.com.';
       }
     }
 
@@ -169,7 +211,7 @@ export class CreateCompanyPage {
     this.submitting.set(true);
     this.form.disable({ emitEvent: false });
 
-    this.api.createCompany(this.form.getRawValue()).subscribe({
+    this.api.createCompany(this.toRequest()).subscribe({
       next: async () => {
         this.submitting.set(false);
         this.form.enable({ emitEvent: false });
@@ -182,6 +224,38 @@ export class CreateCompanyPage {
         this.errorMessage.set(error.message ?? 'Unable to create the company. Please try again.');
       },
     });
+  }
+
+  /**
+   * Form values in the shape the backend expects: `date` inputs give `YYYY-MM-DD`
+   * and `number` inputs hand back strings, so both are converted here.
+   */
+  private toRequest(): CreateCompanyRequest {
+    const value = this.form.getRawValue();
+
+    return {
+      ...value,
+      lat: this.toNumber(value.lat),
+      long: this.toNumber(value.long),
+      packageStartedOn: this.toIsoDate(value.packageStartedOn),
+      packageExpiresOn: this.toIsoDate(value.packageExpiresOn),
+    };
+  }
+
+  private toNumber(value: unknown): number | null {
+    if (value === null || value === '' || value === undefined) {
+      return null;
+
+    }
+
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  /** 'YYYY-MM-DD' → full ISO timestamp; anything unparseable is passed through. */
+  private toIsoDate(value: string): string {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
   }
 
   /** Flags the expiry date when it is not after the start date. */

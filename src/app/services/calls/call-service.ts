@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, map, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
@@ -10,7 +10,6 @@ export interface ApiError {
   message: string;
 }
 
-/** Payload sent when registering a new company. */
 export interface CreateCompanyRequest {
   name: string;
   slug: string;
@@ -26,21 +25,92 @@ export interface CreateCompanyRequest {
   registrationNumber: string;
   taxId: string;
   industry: string;
-  timezone: string;
+  timeZone: string;
   currency: string;
-  plan: string;
+  packageId: string;
   logoUrl: string;
   lat: number | null;
   long: number | null;
-  /** ISO date — when the package starts. */
   packageStartedOn: string;
-  /** ISO date — when the package expires. */
   packageExpiresOn: string;
 }
 
 export interface CreateCompanyResponse {
   id: string;
   name: string;
+}
+
+/** Payload sent when creating a user under a company. */
+export interface CreateUserRequest {
+  companyId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: string;
+  address: string;
+  phoneNumber: string;
+  gender: string;
+  /** ISO timestamp. */
+  dateOfBirth: string;
+  nationality: string;
+  country: string;
+  state: string;
+  city: string;
+  zipCode: string;
+  bloodGroup: string;
+  maritalStatus: string;
+  aadharNumber: string;
+  panNumber: string;
+  passportNumber: string;
+  employeeCode: string;
+  department: string;
+  designation: string;
+  /** ISO timestamp. */
+  dateOfJoining: string;
+  /** ISO timestamp, or null while the user is still employed. */
+  dateOfLeaving: string | null;
+  reportingManager: string;
+  workLocation: string;
+  workShift: string;
+  workPhone: string;
+  emergencyContactName: string;
+  emergencyContactNumber: string;
+  emergencyContactRelation: string;
+  bankAccountNumber: string;
+  bankName: string;
+  bankIfscCode: string;
+  bankBranch: string;
+  profilePicture: string;
+  bankAccountType: string;
+}
+
+export interface CreateUserResponse {
+  id: string;
+  email: string;
+}
+
+/** A subscription plan offered when creating a company. */
+export interface PlanDetails {
+  id: string;
+  name: string;
+  price?: number;
+  currency?: string;
+  durationInDays?: number;
+}
+
+/** A company row as shown on the home list. */
+export interface Company {
+  id: string;
+  name: string;
+  /** Optional remote logo; the card falls back to an initials monogram. */
+  logoUrl?: string;
+  phone: string;
+  planType: string;
+  /** ISO date — when the current plan expires. */
+  validTill: string;
+  /** ISO date — when the current plan was bought. */
+  purchasedOn: string;
 }
 
 /**
@@ -80,6 +150,75 @@ export class CallService {
 
   createCompany(company: CreateCompanyRequest): Observable<CreateCompanyResponse> {
     return this.post<CreateCompanyResponse>('/api/SuperAdmin/add-company', company);
+  }
+
+  createUser(user: CreateUserRequest): Observable<CreateUserResponse> {
+    return this.post<CreateUserResponse>('/api/SuperAdmin/company/add-user', user);
+  }
+
+  /** Plans shown in the subscription section of the create-company form. */
+  get_plan_Details(): Observable<PlanDetails[]> {
+    return this.get<unknown>('/api/SuperAdmin/packages').pipe(
+      map((response) => this.toPlanList(response)),
+    );
+  }
+
+  /** Companies shown on the home list. */
+  get_companyies_list(): Observable<Company[]> {
+    return this.get<unknown>('/api/SuperAdmin/companies').pipe(
+      map((response) => this.toCompanyList(response)),
+    );
+  }
+
+  private toPlanList(response: unknown): PlanDetails[] {
+    return this.unwrapList(response, 'plans').map((item) => {
+      const pick = this.picker(item);
+      const name = pick('name', 'planName', 'title');
+      const price = pick('price', 'amount');
+      const currency = pick('currency');
+      const duration = pick('durationInDays', 'duration');
+
+      return {
+        id: String(pick('id', 'planId', '_id') ?? name ?? ''),
+        name: String(name ?? 'Unnamed plan'),
+        price: price === undefined ? undefined : Number(price),
+        currency: currency === undefined ? undefined : String(currency),
+        durationInDays: duration === undefined ? undefined : Number(duration),
+      };
+    });
+  }
+
+  private toCompanyList(response: unknown): Company[] {
+    return this.unwrapList(response, 'companies').map((item) => {
+      const pick = this.picker(item);
+      const logoUrl = pick('logoUrl', 'logo');
+
+      return {
+        id: String(pick('id', 'companyId', '_id') ?? ''),
+        name: String(pick('name', 'companyName') ?? 'Unnamed company'),
+        logoUrl: logoUrl === undefined ? undefined : String(logoUrl),
+        phone: String(pick('phone', 'phoneNumber', 'contactNumber') ?? ''),
+        planType: String(pick('planType', 'plan', 'packageName', 'planName') ?? '—'),
+        validTill: String(pick('validTill', 'packageExpiresOn', 'expiresOn') ?? ''),
+        purchasedOn: String(pick('purchasedOn', 'packageStartedOn', 'startedOn', 'createdAt') ?? ''),
+      };
+    });
+  }
+
+  /** Accepts a bare array or a `{ data | <key> | result: [...] }` envelope. */
+  private unwrapList(response: unknown, key: string): Record<string, unknown>[] {
+    const envelope = (response ?? {}) as Record<string, unknown>;
+    const list = Array.isArray(response)
+      ? response
+      : envelope['data'] ?? envelope[key] ?? envelope['result'];
+
+    return Array.isArray(list) ? list.map((entry) => (entry ?? {}) as Record<string, unknown>) : [];
+  }
+
+  /** First non-null value among the given keys — backends spell these differently. */
+  private picker(item: Record<string, unknown>) {
+    return (...keys: string[]): unknown =>
+      keys.map((key) => item[key]).find((value) => value !== undefined && value !== null);
   }
 
   private url(path: string): string {

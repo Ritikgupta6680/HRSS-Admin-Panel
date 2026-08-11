@@ -285,7 +285,7 @@
 
         <div class="field">
           <ion-select
-            formControlName="timezone"
+            formControlName="timeZone"
             label="Timezone *"
             labelPlacement="floating"
             fill="outline"
@@ -319,16 +319,38 @@
       <div class="field-grid">
         <div class="field">
           <ion-select
-            formControlName="plan"
+            formControlName="packageId"
             label="Plan *"
             labelPlacement="floating"
             fill="outline"
             interface="popover"
+            [disabled]="plansLoading() || !plans().length"
+            [placeholder]="plansLoading() ? 'Loading plans…' : 'Select a plan'"
+            [class.ion-invalid]="isInvalid('packageId')"
+            [class.ion-touched]="isInvalid('packageId')"
           >
-            @for (planOption of plans; track planOption) {
-              <ion-select-option [value]="planOption">{{ planOption }}</ion-select-option>
+            @for (planOption of plans(); track planOption.id) {
+              <ion-select-option [value]="planOption.id">
+                {{ planOption.name }}@if (planOption.price != null) { — {{ planOption.price }} {{ planOption.currency ?? '' }}}
+              </ion-select-option>
             }
           </ion-select>
+
+          @if (plansLoading()) {
+            <ion-note class="field-error">
+              <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+              Loading plans…
+            </ion-note>
+          } @else if (plansError(); as planMessage) {
+            <ion-note color="danger" class="field-error">
+              {{ planMessage }}
+              <ion-button fill="clear" size="small" (click)="loadPlans()">Retry</ion-button>
+            </ion-note>
+          } @else if (!plans().length) {
+            <ion-note color="medium" class="field-error">No plans available.</ion-note>
+          } @else if (isInvalid('packageId')) {
+            <ion-note color="danger" class="field-error">{{ errorFor('packageId') }}</ion-note>
+          }
         </div>
 
         <div class="field">

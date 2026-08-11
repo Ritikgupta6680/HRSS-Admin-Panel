@@ -64,7 +64,6 @@ export class LoginComponent {
     this.showPassword.update((visible) => !visible);
   }
 
-  /** True once the field is both invalid and has been interacted with. */
   isInvalid(field: 'email' | 'password'): boolean {
     const control = this.form.controls[field];
     return control.invalid && (control.dirty || control.touched);
