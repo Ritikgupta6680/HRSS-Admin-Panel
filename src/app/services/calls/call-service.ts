@@ -90,6 +90,27 @@ export interface CreateUserResponse {
   email: string;
 }
 
+/** A company as returned by the detail endpoint — the create payload plus its id. */
+export interface CompanyDetails extends CreateCompanyRequest {
+  id: string;
+}
+
+/** A user row as shown in the company's user list. */
+export interface CompanyUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  phoneNumber: string;
+  designation: string;
+  department: string;
+  profilePicture: string;
+}
+
+/** A user as returned by the detail endpoint — the create payload minus the password. */
+export type UserDetails = Omit<CreateUserRequest, 'password'> & { id: string };
+
 /** A subscription plan offered when creating a company. */
 export interface PlanDetails {
   id: string;
@@ -156,6 +177,41 @@ export class CallService {
     return this.post<CreateUserResponse>('/api/SuperAdmin/company/add-user', user);
   }
 
+  /** Everything stored about one company, used by the detail and edit screens. */
+  get_company_details(companyId: string): Observable<CompanyDetails> {
+    return this.get<unknown>(`/api/SuperAdmin/company/${companyId}`).pipe(
+      map((response) => this.toCompanyDetails(response)),
+    );
+  }
+
+  updateCompany(companyId: string, company: CreateCompanyRequest): Observable<CompanyDetails> {
+    return this.put<CompanyDetails>(`/api/SuperAdmin/companies/${companyId}`, company);
+  }
+
+
+  deleteCompany(companyId: string): Observable<void> {
+    return this.post<void>(`/api/SuperAdmin/delete-company`, { companyId });
+  }
+
+  /** Users belonging to one company. */
+  get_company_users(companyId: string): Observable<CompanyUser[]> {
+    return this.get<unknown>(`/api/SuperAdmin/company/users/${companyId}`).pipe(
+      map((response) => this.toUserList(response)),
+    );
+  }
+
+  get_user_details(userId: string): Observable<UserDetails> {
+    return this.get<UserDetails>(`/api/SuperAdmin/company/user/${userId}`);
+  }
+
+  deleteUser(userId: string): Observable<void> {
+    return this.delete<void>(`/api/SuperAdmin/company/delete-user/${userId}`);
+  }
+
+  updateUser(userId: string, user: Omit<CreateUserRequest, 'password'>): Observable<UserDetails> {
+    return this.put<UserDetails>(`/api/SuperAdmin/users/${userId}`, user);
+  }
+
   /** Plans shown in the subscription section of the create-company form. */
   get_plan_Details(): Observable<PlanDetails[]> {
     return this.get<unknown>('/api/SuperAdmin/packages').pipe(
@@ -201,6 +257,41 @@ export class CallService {
         planType: String(pick('planType', 'plan', 'packageName', 'planName') ?? '—'),
         validTill: String(pick('validTill', 'packageExpiresOn', 'expiresOn') ?? ''),
         purchasedOn: String(pick('purchasedOn', 'packageStartedOn', 'startedOn', 'createdAt') ?? ''),
+      };
+    });
+  }
+
+  /** Unwraps a `{ data | company | result: {...} }` envelope around a single company. */
+  private toCompanyDetails(response: unknown): CompanyDetails {
+    const envelope = (response ?? {}) as Record<string, unknown>;
+    const body = (envelope['data'] ?? envelope['company'] ?? envelope['result'] ?? envelope) as Record<
+      string,
+      unknown
+    >;
+    const pick = this.picker(body);
+
+    return {
+      ...(body as unknown as CompanyDetails),
+      id: String(pick('id', 'companyId', '_id') ?? ''),
+      // The list and detail endpoints disagree on casing for this one.
+      timeZone: String(pick('timeZone', 'timezone') ?? ''),
+    };
+  }
+
+  private toUserList(response: unknown): CompanyUser[] {
+    return this.unwrapList(response, 'users').map((item) => {
+      const pick = this.picker(item);
+
+      return {
+        id: String(pick('id', 'userId', '_id') ?? ''),
+        firstName: String(pick('firstName', 'firstname') ?? ''),
+        lastName: String(pick('lastName', 'lastname') ?? ''),
+        email: String(pick('email') ?? ''),
+        role: String(pick('role', 'roleName') ?? ''),
+        phoneNumber: String(pick('phoneNumber', 'phone') ?? ''),
+        designation: String(pick('designation') ?? ''),
+        department: String(pick('department') ?? ''),
+        profilePicture: String(pick('profilePicture', 'avatar') ?? ''),
       };
     });
   }

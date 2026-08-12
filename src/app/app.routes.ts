@@ -15,8 +15,27 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./companies/create-company/create-company.page').then((m) => m.CreateCompanyPage),
   },
+  // Must stay after `companies/new` so the literal path wins over `:id`.
+  {
+    path: 'companies/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./companies/company-detail/company-detail.page').then((m) => m.CompanyDetailPage),
+  },
+  {
+    path: 'companies/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./companies/create-company/create-company.page').then((m) => m.CreateCompanyPage),
+  },
   {
     path: 'users/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./users/create-user/create-user.page').then((m) => m.CreateUserPage),
+  },
+  {
+    path: 'users/:id/edit',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./users/create-user/create-user.page').then((m) => m.CreateUserPage),

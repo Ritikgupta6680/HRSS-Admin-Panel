@@ -1,0 +1,193 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ company()?.name ?? 'Company' }}</ion-title>
+    <!-- <ion-buttons slot="end">
+      <ion-button [disabled]="!company()" (click)="editCompany()">
+        <ion-icon slot="start" name="create-outline" aria-hidden="true"></ion-icon>
+        Edit
+      </ion-button>
+      <ion-button
+        color="danger"
+        aria-label="Delete company"
+        [disabled]="!company() || deleting()"
+        (click)="deleteCompany()"
+      >
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons> -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="detail-content">
+  <div class="page">
+    @if (companyLoading()) {
+      <div class="state-panel">
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <strong>Loading company…</strong>
+      </div>
+    } @else if (companyError(); as message) {
+      <div class="state-panel" role="alert">
+        <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+        <strong>Could not load this company</strong>
+        <p>{{ message }}</p>
+        <ion-button fill="outline" shape="round" (click)="loadCompany()">Retry</ion-button>
+      </div>
+    } @else if (company(); as detail) {
+      <header class="company-head">
+        <div class="logo">
+          @if (detail.logoUrl) {
+            <img [src]="detail.logoUrl" [alt]="detail.name + ' logo'" />
+          } @else {
+            <span>{{ initials(detail.name) }}</span>
+          }
+        </div>
+
+        <div class="identity">
+          <h2>{{ detail.name }}</h2>
+          <p class="muted">{{ detail.domain }}</p>
+        </div>
+
+        <div class="head-actions">
+          <ion-button class="head-action" shape="round" (click)="editCompany()">
+            <ion-icon slot="start" name="create-outline" aria-hidden="true"></ion-icon>
+            Edit company
+          </ion-button>
+
+          <ion-button
+            class="head-action"
+            shape="round"
+            fill="outline"
+            color="danger"
+            [disabled]="deleting()"
+            (click)="deleteCompany()"
+          >
+            @if (deleting()) {
+              <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+              <span class="ion-padding-start">Deleting…</span>
+            } @else {
+              <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon>
+              Delete
+            }
+          </ion-button>
+        </div>
+      </header>
+
+      <section class="detail-card">
+        <h3>Subscription</h3>
+        <dl class="detail-grid">
+          <div class="detail-row">
+            <dt>Package starts on</dt>
+            <dd>{{ (detail.packageStartedOn | date: 'dd MMM yyyy') || '—' }}</dd>
+          </div>
+          <div class="detail-row">
+            <dt>Package expires on</dt>
+            <dd>{{ (detail.packageExpiresOn | date: 'dd MMM yyyy') || '—' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      @for (section of sections(); track section.title) {
+        <section class="detail-card">
+          <h3>{{ section.title }}</h3>
+          <dl class="detail-grid">
+            @for (row of section.rows; track row.label) {
+              <div class="detail-row">
+                <dt>{{ row.label }}</dt>
+                <dd>
+                  @if (row.value && row.href) {
+                    <a [href]="row.href" rel="noopener">{{ row.value }}</a>
+                  } @else {
+                    {{ row.value || '—' }}
+                  }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+
+       <section class="detail-card">
+        <div class="card-head">
+          <h3>Users</h3>
+          <ion-button fill="clear" size="small" (click)="addUser()">Add user</ion-button>
+        </div>
+
+        @if (usersLoading()) {
+          <div class="state-panel compact">
+            <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+            <strong>Loading users…</strong>
+          </div>
+        } @else if (usersError(); as usersMessage) {
+          <div class="state-panel compact" role="alert">
+            <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+            <p>{{ usersMessage }}</p>
+            <ion-button fill="outline" size="small" shape="round" (click)="loadUsers()">
+              Retry
+            </ion-button>
+          </div>
+        } @else if (!users().length) {
+          <div class="state-panel compact">
+            <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+            <p>No users yet for this company.</p>
+          </div>
+        } @else {
+          <ul class="user-list">
+            @for (user of users(); track user.id) {
+              <li class="user-row">
+                <div class="avatar">
+                  @if (user.profilePicture) {
+                    <img [src]="user.profilePicture" [alt]="fullName(user)" />
+                  } @else {
+                    <span>{{ initials(fullName(user)) }}</span>
+                  }
+                </div>
+
+                <div class="user-identity">
+                  <strong>{{ fullName(user) }}</strong>
+                  <span class="muted">{{ user.email }}</span>
+                  @if (user.designation || user.department) {
+                    <span class="muted">
+                      {{ user.designation }}@if (user.designation && user.department) { · }{{ user.department }}
+                    </span>
+                  }
+                </div>
+
+                @if (user.role) {
+                  <span class="role-badge">{{ user.role }}</span>
+                }
+
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  [disabled]="deletingUserId() === user.id"
+                  [attr.aria-label]="'Edit ' + fullName(user)"
+                  (click)="editUser(user)"
+                >
+                  <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                </ion-button>
+
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  color="danger"
+                  [disabled]="deletingUserId() === user.id"
+                  [attr.aria-label]="'Delete ' + fullName(user)"
+                  (click)="deleteUser(user)"
+                >
+                  @if (deletingUserId() === user.id) {
+                    <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+                  } @else {
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  }
+                </ion-button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  </div>
+</ion-content>

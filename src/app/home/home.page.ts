@@ -1,16 +1,19 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
+  IonMenuButton,
   IonSearchbar,
-  IonSpinner,
+  IonSkeletonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
+import { ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -38,11 +41,13 @@ import { ApiError, CallService, Company } from '../services/calls/call-service';
     IonContent,
     IonIcon,
     IonButton,
+    IonButtons,
+    IonMenuButton,
     IonSearchbar,
-    IonSpinner,
+    IonSkeletonText,
   ],
 })
-export class HomePage implements OnInit {
+export class HomePage implements ViewWillEnter {
   private readonly auth = inject(AuthService);
   private readonly api = inject(CallService);
   private readonly router = inject(Router)
@@ -51,6 +56,9 @@ export class HomePage implements OnInit {
 
   private readonly companies = signal<Company[]>([]);
   private readonly query = signal('');
+
+  /** Placeholder cards shown while the list loads. */
+  readonly skeletonCards = [1, 2, 3, 4, 5, 6];
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -85,7 +93,11 @@ export class HomePage implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  /**
+   * Ionic keeps this page alive in the nav stack, so `ngOnInit` runs only once.
+   * Reloading on every entry keeps the list fresh after a company is created or edited.
+   */
+  ionViewWillEnter(): void {
     this.loadCompanies();
   }
 
@@ -157,6 +169,10 @@ export class HomePage implements OnInit {
 
   createCompany(): void {
     this.router.navigateByUrl('/companies/new');
+  }
+
+  openCompany(company: Company): void {
+    this.router.navigate(['/companies', company.id]);
   }
 
   createUser(): void {

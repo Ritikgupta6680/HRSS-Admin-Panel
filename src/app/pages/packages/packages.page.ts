@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonImg, IonItem, IonLabel, IonList, IonListHeader, IonModal, IonSearchbar, IonSkeletonText, IonThumbnail, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonButton, IonButtons, IonMenuButton, IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonListHeader, IonModal, IonSearchbar, IonSkeletonText, IonThumbnail, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { Data, CreatePackageRequest, UpdatePackageRequest } from '../../services/data/data';
 import { addIcons } from 'ionicons';
 import { AuthService } from '../../services/auth/auth-service';
@@ -35,7 +35,7 @@ enum ModalMode {
   templateUrl: './packages.page.html',
   styleUrls: ['./packages.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonIcon, IonButton, IonSearchbar, IonFab, IonFabButton, IonModal, PackageAddComponent, IonSkeletonText, IonList, IonListHeader, IonItem, IonLabel, IonThumbnail, IonImg],
+  imports: [IonContent, IonButtons, IonMenuButton, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonIcon, IonButton, IonSearchbar, IonFab, IonFabButton, IonModal, PackageAddComponent, IonSkeletonText, IonList, IonListHeader, IonItem, IonLabel, IonThumbnail],
 })
 export class PackagesPage implements OnInit {
 

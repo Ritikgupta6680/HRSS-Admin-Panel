@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>New user</ion-title>
+    <ion-title>{{ isEdit() ? 'Edit user' : 'New user' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -89,7 +89,7 @@
           <ion-input
             formControlName="password"
             type="password"
-            label="Password *"
+            [label]="isEdit() ? 'Password' : 'Password *'"
             labelPlacement="floating"
             fill="outline"
             placeholder="8+ chars, upper, lower, number, symbol"
@@ -98,6 +98,8 @@
           ></ion-input>
           @if (isInvalid('password')) {
             <ion-note color="danger" class="field-error">{{ errorFor('password') }}</ion-note>
+          } @else if (isEdit()) {
+            <ion-note color="medium" class="field-error">Leave blank to keep the current password.</ion-note>
           }
         </div>
       </div>
@@ -598,9 +600,9 @@
     >
       @if (submitting()) {
         <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
-        <span class="ion-padding-start">Creating…</span>
+        <span class="ion-padding-start">Saving…</span>
       } @else {
-        Create user
+        {{ isEdit() ? 'Save changes' : 'Create user' }}
       }
     </ion-button>
   </form>

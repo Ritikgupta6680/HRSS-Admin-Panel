@@ -4,7 +4,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>New company</ion-title>
+    <ion-title>{{ isEdit() ? 'Edit company' : 'New company' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -229,7 +229,7 @@
           <ion-input
             formControlName="lat"
             type="number"
-            label="Latitude"
+            label="Latitude *"
             labelPlacement="floating"
             fill="outline"
             placeholder="26.9124"
@@ -245,7 +245,7 @@
           <ion-input
             formControlName="long"
             type="number"
-            label="Longitude"
+            label="Longitude *"
             labelPlacement="floating"
             fill="outline"
             placeholder="75.7873"
@@ -394,9 +394,9 @@
     >
       @if (submitting()) {
         <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
-        <span class="ion-padding-start">Creating…</span>
+        <span class="ion-padding-start">Saving…</span>
       } @else {
-        Create company
+        {{ isEdit() ? 'Save changes' : 'Create company' }}
       }
     </ion-button>
   </form>

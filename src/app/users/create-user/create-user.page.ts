@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonBackButton,
   IonButton,
@@ -57,6 +57,7 @@ export class CreateUserPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(CallService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastController);
 
   readonly roles = ['CompanyAdmin',];
@@ -119,7 +120,12 @@ export class CreateUserPage implements OnInit {
     bankAccountType: [''],
   });
 
+  /** Empty when creating; set to the user being edited otherwise. */
+  readonly userId = signal('');
+  readonly isEdit = computed(() => this.userId() !== '');
+
   readonly submitting = signal(false);
+  readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly companies = signal<Company[]>([]);
@@ -131,7 +137,53 @@ export class CreateUserPage implements OnInit {
   }
 
   ngOnInit(): void {
+    // A `:id` in the route turns this page into the edit screen.
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.userId.set(id);
+
     this.loadCompanies();
+
+    if (id) {
+      // The backend never returns the password, so it is not edited here.
+      this.form.controls.password.removeValidators(Validators.required);
+      this.form.controls.password.updateValueAndValidity();
+      this.loadUser(id);
+      return;
+    }
+
+    // `users/new?companyId=…` preselects the company the user came from.
+    const companyId = this.route.snapshot.queryParamMap.get('companyId');
+
+    if (companyId) {
+      this.form.controls.companyId.setValue(companyId);
+    }
+  }
+
+  /** Prefills the form with the user being edited. */
+  private loadUser(id: string): void {
+    this.loading.set(true);
+
+    this.api.get_user_details(id).subscribe({
+      next: (user) => {
+        this.loading.set(false);
+        this.form.patchValue({
+          ...user,
+          dateOfBirth: this.toDateInput(user.dateOfBirth),
+          dateOfJoining: this.toDateInput(user.dateOfJoining),
+          dateOfLeaving: this.toDateInput(user.dateOfLeaving ?? ''),
+        });
+      },
+      error: (error: ApiError) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message ?? 'Unable to load this user.');
+      },
+    });
+  }
+
+  /** ISO timestamp → the `YYYY-MM-DD` a `type="date"` input expects. */
+  private toDateInput(value: string): string {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
   }
 
   loadCompanies(): void {
@@ -218,19 +270,34 @@ export class CreateUserPage implements OnInit {
     this.submitting.set(true);
     this.form.disable({ emitEvent: false });
 
-    this.api.createUser(this.toRequest()).subscribe({
+    const id = this.userId();
+    const { password, ...withoutPassword } = this.toRequest();
+    const request = id
+      ? this.api.updateUser(id, withoutPassword)
+      : this.api.createUser(this.toRequest());
+
+    request.subscribe({
       next: async () => {
         this.submitting.set(false);
         this.form.enable({ emitEvent: false });
-        await this.showToast('User created successfully.', 'success');
-        this.router.navigateByUrl('/home', { replaceUrl: true });
+        await this.showToast(
+          id ? 'User updated successfully.' : 'User created successfully.',
+          'success',
+        );
+        this.goBack();
       },
       error: (error: ApiError) => {
         this.submitting.set(false);
         this.form.enable({ emitEvent: false });
-        this.errorMessage.set(error.message ?? 'Unable to create the user. Please try again.');
+        this.errorMessage.set(error.message ?? 'Unable to save the user. Please try again.');
       },
     });
+  }
+
+  /** Back to the company the user belongs to when known, otherwise home. */
+  private goBack(): void {
+    const companyId = this.form.getRawValue().companyId;
+    this.router.navigateByUrl(companyId ? `/companies/${companyId}` : '/home', { replaceUrl: true });
   }
 
   private toRequest(): CreateUserRequest {

@@ -1,12 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
     <ion-title>HRSS Admin</ion-title>
     <!-- <ion-button slot="end" fill="clear" aria-label="Create a new company" (click)="createCompany()">
       <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
     </ion-button> -->
-    <ion-button slot="end" fill="clear" aria-label="Sign out" (click)="logout()">
+    <!-- <ion-button slot="end" fill="clear" aria-label="Sign out" (click)="logout()">
       <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-    </ion-button>
+    </ion-button> -->
   </ion-toolbar>
 </ion-header>
 
@@ -38,16 +41,44 @@
         New company
       </ion-button>
 
-      <ion-button class="create-button" shape="round" fill="outline" (click)="createUser()">
+      <!-- <ion-button class="create-button" shape="round" fill="outline" (click)="createUser()">
         <ion-icon slot="start" name="person-add-outline" aria-hidden="true"></ion-icon>
         New user
-      </ion-button>
+      </ion-button> -->
     </div>
 
     @if (loading()) {
-      <div class="empty-state">
-        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
-        <strong>Loading companies…</strong>
+      <div class="company-grid" aria-busy="true" aria-label="Loading companies">
+        @for (placeholder of skeletonCards; track placeholder) {
+          <article class="company-card skeleton-card">
+            <div class="card-top">
+              <div class="logo">
+                <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+              </div>
+
+              <div class="identity">
+                <ion-skeleton-text [animated]="true" style="width: 65%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 45%"></ion-skeleton-text>
+              </div>
+            </div>
+
+            <dl class="card-meta">
+              <div class="meta-item">
+                <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              </div>
+
+              <div class="meta-item">
+                <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+              </div>
+            </dl>
+
+            <footer class="card-foot">
+              <ion-skeleton-text [animated]="true" style="width: 90px"></ion-skeleton-text>
+            </footer>
+          </article>
+        }
       </div>
     } @else if (errorMessage(); as message) {
       <div class="empty-state" role="alert">
@@ -65,7 +96,15 @@
     } @else {
       <div class="company-grid">
         @for (company of visibleCompanies(); track company.id) {
-          <article class="company-card">
+          <article
+            class="company-card"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'Open ' + company.name"
+            (click)="openCompany(company)"
+            (keydown.enter)="openCompany(company)"
+            (keydown.space)="openCompany(company)"
+          >
             <div class="card-top">
               <div class="logo">
                 @if (company.logoUrl) {
@@ -78,7 +117,7 @@
               <div class="identity">
                 <h3>{{ company.name }}</h3>
                 @if (company.phone) {
-                  <a class="phone" [href]="'tel:' + company.phone">
+                  <a class="phone" [href]="'tel:' + company.phone" (click)="$event.stopPropagation()">
                     <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
                     {{ company.phone }}
                   </a>

@@ -1,3 +1,40 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <!-- `disabled` keeps the menu (and its swipe gesture) off the login screen. -->
+  <ion-menu contentId="main-content" menuId="main-menu" [disabled]="!isAuthenticated()">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>HRSS Admin</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list lines="none">
+        @for (item of menuItems; track item.url) {
+          <ion-menu-toggle [autoHide]="false">
+            <ion-item
+              class="menu-item"
+              [routerLink]="item.url"
+              routerLinkActive="menu-item-active"
+              routerDirection="root"
+              [detail]="false"
+            >
+              <ion-icon slot="start" [name]="item.icon" aria-hidden="true"></ion-icon>
+              <ion-label>{{ item.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+      </ion-list>
+
+      <ion-list lines="none" class="menu-foot">
+        <ion-menu-toggle [autoHide]="false">
+          <ion-item class="menu-item" button [detail]="false" (click)="logout()">
+            <ion-icon slot="start" name="log-out-outline" aria-hidden="true"></ion-icon>
+            <ion-label>Sign out</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

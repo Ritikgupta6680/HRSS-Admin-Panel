@@ -1,0 +1,24 @@
+.menu-item {
+  --border-radius: 10px;
+  --padding-start: 12px;
+  margin: 4px 8px;
+  font-size: 0.95rem;
+
+  ion-icon {
+    color: var(--ion-color-medium, #92949c);
+  }
+}
+
+.menu-item-active {
+  --background: rgb(56 128 255 / 12%);
+  --color: var(--ion-color-primary, #3880ff);
+  font-weight: 600;
+
+  ion-icon {
+    color: var(--ion-color-primary, #3880ff);
+  }
+}
+
+.menu-foot {
+  margin-top: auto;
+}

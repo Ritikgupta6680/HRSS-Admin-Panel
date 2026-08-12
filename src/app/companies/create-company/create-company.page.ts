@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonBackButton,
   IonButton,
@@ -27,10 +27,8 @@ import {
   PlanDetails,
 } from '../../services/calls/call-service';
 
-// Dots are allowed so a domain can be used as the slug.
 const SLUG_PATTERN = /^[a-z0-9]+(?:[-.][a-z0-9]+)*$/;
 const DOMAIN_PATTERN = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
-// The protocol is optional — the backend accepts bare hosts like `www.acme.com`.
 const URL_PATTERN = /^(https?:\/\/)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i;
 const PHONE_PATTERN = /^\+?[0-9 ()-]{7,20}$/;
 
@@ -59,6 +57,7 @@ export class CreateCompanyPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(CallService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastController);
 
   readonly currencies = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD'];
@@ -91,13 +90,18 @@ export class CreateCompanyPage implements OnInit {
     currency: ['INR', [Validators.required]],
     packageId: ['', [Validators.required]],
     logoUrl: ['', [Validators.pattern(URL_PATTERN)]],
-    lat: [null as number | null, [Validators.min(-90), Validators.max(90)]],
-    long: [null as number | null, [Validators.min(-180), Validators.max(180)]],
+    lat: [null as number | null, [Validators.required, Validators.min(-90), Validators.max(90)]],
+    long: [null as number | null, [Validators.required, Validators.min(-180), Validators.max(180)]],
     packageStartedOn: ['', [Validators.required]],
     packageExpiresOn: ['', [Validators.required]],
   });
 
+  /** Empty when creating; set to the company being edited otherwise. */
+  readonly companyId = signal('');
+  readonly isEdit = computed(() => this.companyId() !== '');
+
   readonly submitting = signal(false);
+  readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly plans = signal<PlanDetails[]>([]);
@@ -118,7 +122,43 @@ export class CreateCompanyPage implements OnInit {
   }
 
   ngOnInit(): void {
+    // A `:id` in the route turns this page into the edit screen.
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.companyId.set(id);
+
     this.loadPlans();
+
+    if (id) {
+      this.loadCompany(id);
+    }
+  }
+
+  /** Prefills the form with the company being edited. */
+  private loadCompany(id: string): void {
+    this.loading.set(true);
+
+    this.api.get_company_details(id).subscribe({
+      next: (company) => {
+        this.loading.set(false);
+        this.form.patchValue({
+          ...company,
+          packageStartedOn: this.toDateInput(company.packageStartedOn),
+          packageExpiresOn: this.toDateInput(company.packageExpiresOn),
+        });
+        // The name is prefilled, so the slug must not be regenerated over it.
+        this.form.controls.slug.markAsDirty();
+      },
+      error: (error: ApiError) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message ?? 'Unable to load this company.');
+      },
+    });
+  }
+
+  /** ISO timestamp → the `YYYY-MM-DD` a `type="date"` input expects. */
+  private toDateInput(value: string): string {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
   }
 
   /** Fills the plan dropdown from the backend. */
@@ -211,17 +251,27 @@ export class CreateCompanyPage implements OnInit {
     this.submitting.set(true);
     this.form.disable({ emitEvent: false });
 
-    this.api.createCompany(this.toRequest()).subscribe({
+    const id = this.companyId();
+    const request = id
+      ? this.api.updateCompany(id, this.toRequest())
+      : this.api.createCompany(this.toRequest());
+
+    request.subscribe({
       next: async () => {
         this.submitting.set(false);
         this.form.enable({ emitEvent: false });
-        await this.showToast('Company created successfully.', 'success');
-        this.router.navigateByUrl('/home', { replaceUrl: true });
+        await this.showToast(
+          id ? 'Company updated successfully.' : 'Company created successfully.',
+          'success',
+        );
+        this.router.navigateByUrl(id ? `/companies/${id}` : '/home', { replaceUrl: true });
       },
       error: (error: ApiError) => {
         this.submitting.set(false);
         this.form.enable({ emitEvent: false });
-        this.errorMessage.set(error.message ?? 'Unable to create the company. Please try again.');
+        this.errorMessage.set(
+          error.message ?? 'Unable to save the company. Please try again.',
+        );
       },
     });
   }

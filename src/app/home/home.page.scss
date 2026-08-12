@@ -72,10 +72,41 @@
   background: var(--ion-card-background, #fff);
   box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
   transition: transform 150ms ease, box-shadow 150ms ease;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary, #3880ff);
+    outline-offset: 2px;
+  }
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  }
+}
+
+.skeleton-card {
+  cursor: default;
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
+  }
+
+  .logo ion-skeleton-text {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .identity ion-skeleton-text {
+    height: 14px;
+    margin: 0 0 8px;
+  }
+
+  .meta-item ion-skeleton-text {
+    height: 12px;
+    margin: 0 0 6px;
   }
 }
 
