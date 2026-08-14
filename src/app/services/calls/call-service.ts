@@ -179,7 +179,7 @@ export class CallService {
 
   /** Everything stored about one company, used by the detail and edit screens. */
   get_company_details(companyId: string): Observable<CompanyDetails> {
-    return this.get<unknown>(`/api/SuperAdmin/company/${companyId}`).pipe(
+    return this.get<unknown>(`/api/SuperAdmin/company?id=${companyId}`).pipe(
       map((response) => this.toCompanyDetails(response)),
     );
   }
@@ -195,13 +195,13 @@ export class CallService {
 
   /** Users belonging to one company. */
   get_company_users(companyId: string): Observable<CompanyUser[]> {
-    return this.get<unknown>(`/api/SuperAdmin/company/users/${companyId}`).pipe(
+    return this.get<unknown>(`/api/SuperAdmin/company/users?companyId=${companyId}`).pipe(
       map((response) => this.toUserList(response)),
     );
   }
 
   get_user_details(userId: string): Observable<UserDetails> {
-    return this.get<UserDetails>(`/api/SuperAdmin/company/user/${userId}`);
+    return this.get<UserDetails>(`/api/SuperAdmin/company/user?id=${userId}`);
   }
 
   deleteUser(userId: string): Observable<void> {
