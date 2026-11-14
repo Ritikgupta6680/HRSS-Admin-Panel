@@ -60,7 +60,10 @@ export class CreateUserPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastController);
 
-  readonly roles = ['CompanyAdmin',];
+  readonly roles = ['CompanyAdmin', 'HR', 'Manager', 'Employee'];
+  readonly departments = signal<{ id: string; name: string }[]>([]);
+  readonly designations = signal<{ id: string; name: string }[]>([]);
+  readonly shifts = signal<{ id: string; name: string; startTime: string; endTime: string }[]>([]);
   readonly genders = ['Male', 'Female', 'Other'];
   readonly bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   readonly maritalStatuses = ['Single', 'Married', 'Divorced', 'Widowed'];
@@ -134,6 +137,10 @@ export class CreateUserPage implements OnInit {
 
   constructor() {
     addIcons({ alertCircleOutline });
+
+    this.form.controls.companyId.valueChanges.subscribe((cid) => {
+      this.loadCompanyLookups(cid);
+    });
   }
 
   ngOnInit(): void {
@@ -160,6 +167,30 @@ export class CreateUserPage implements OnInit {
   }
 
   /** Prefills the form with the user being edited. */
+  private loadCompanyLookups(companyId: string): void {
+    if (!companyId) {
+      this.departments.set([]);
+      this.designations.set([]);
+      this.shifts.set([]);
+      return;
+    }
+
+    this.api.getDepartments(companyId).subscribe({
+      next: (data) => this.departments.set(data ?? []),
+      error: () => this.departments.set([]),
+    });
+
+    this.api.getDesignations(companyId).subscribe({
+      next: (data) => this.designations.set(data ?? []),
+      error: () => this.designations.set([]),
+    });
+
+    this.api.getShifts(companyId).subscribe({
+      next: (data) => this.shifts.set(data ?? []),
+      error: () => this.shifts.set([]),
+    });
+  }
+
   private loadUser(id: string): void {
     this.loading.set(true);
 

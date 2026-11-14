@@ -185,12 +185,18 @@ export class CallService {
   }
 
   updateCompany(companyId: string, company: CreateCompanyRequest): Observable<CompanyDetails> {
-    return this.put<CompanyDetails>(`/api/SuperAdmin/companies/${companyId}`, company);
+    return this.post<CompanyDetails>('/api/SuperAdmin/update-company', {
+      ...company,
+      id: companyId,
+    });
   }
 
-
-  deleteCompany(companyId: string): Observable<void> {
-    return this.post<void>(`/api/SuperAdmin/delete-company`, { companyId });
+  deleteCompany(companyId: string, reason: string = 'Deactivated by Super Admin'): Observable<void> {
+    return this.post<void>('/api/SuperAdmin/delete-company', {
+      id: companyId,
+      companyId,
+      reason,
+    });
   }
 
   /** Users belonging to one company. */
@@ -209,7 +215,19 @@ export class CallService {
   }
 
   updateUser(userId: string, user: Omit<CreateUserRequest, 'password'>): Observable<UserDetails> {
-    return this.put<UserDetails>(`/api/SuperAdmin/users/${userId}`, user);
+    return this.put<UserDetails>(`/api/SuperAdmin/company/update-user/${userId}`, user);
+  }
+
+  getDepartments(companyId: string): Observable<{ id: string; name: string }[]> {
+    return this.get<{ id: string; name: string }[]>(`/api/Hr/departments?companyId=${companyId}`);
+  }
+
+  getDesignations(companyId: string): Observable<{ id: string; name: string }[]> {
+    return this.get<{ id: string; name: string }[]>(`/api/Hr/designations?companyId=${companyId}`);
+  }
+
+  getShifts(companyId: string): Observable<{ id: string; name: string; startTime: string; endTime: string }[]> {
+    return this.get<{ id: string; name: string; startTime: string; endTime: string }[]>(`/api/Shift/company/${companyId}`);
   }
 
   /** Plans shown in the subscription section of the create-company form. */

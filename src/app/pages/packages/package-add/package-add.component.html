@@ -93,9 +93,11 @@
       <ion-button fill="outline" color="medium" type="button" (click)="cancel()">
         {{ type === 'view' ? 'Close' : 'Cancel' }}
       </ion-button>
-      <!-- <ion-button color="danger" type="button" (click)="delete()" [disabled]="type === 'view' ||type === 'create'">
+      @if (type === 'edit') {
+      <ion-button color="danger" fill="outline" type="button" (click)="delete()">
         Delete Package
-      </ion-button> -->
+      </ion-button>
+      }
       @if (type !== 'view') {
       <ion-button type="submit" [disabled]="form.invalid">
         {{ type === 'edit' ? 'Update Package' : 'Save Package' }}

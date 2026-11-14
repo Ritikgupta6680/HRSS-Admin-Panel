@@ -397,23 +397,53 @@
         </div>
 
         <div class="field">
-          <ion-input
-            formControlName="department"
-            label="Department"
-            labelPlacement="floating"
-            fill="outline"
-            placeholder="Management"
-          ></ion-input>
+          @if (departments().length) {
+            <ion-select
+              formControlName="department"
+              label="Department"
+              labelPlacement="floating"
+              fill="outline"
+              interface="popover"
+              placeholder="Select department"
+            >
+              @for (dept of departments(); track dept.id) {
+                <ion-select-option [value]="dept.id">{{ dept.name }}</ion-select-option>
+              }
+            </ion-select>
+          } @else {
+            <ion-input
+              formControlName="department"
+              label="Department"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="Management"
+            ></ion-input>
+          }
         </div>
 
         <div class="field">
-          <ion-input
-            formControlName="designation"
-            label="Designation"
-            labelPlacement="floating"
-            fill="outline"
-            placeholder="CEO"
-          ></ion-input>
+          @if (designations().length) {
+            <ion-select
+              formControlName="designation"
+              label="Designation"
+              labelPlacement="floating"
+              fill="outline"
+              interface="popover"
+              placeholder="Select designation"
+            >
+              @for (desig of designations(); track desig.id) {
+                <ion-select-option [value]="desig.id">{{ desig.name }}</ion-select-option>
+              }
+            </ion-select>
+          } @else {
+            <ion-input
+              formControlName="designation"
+              label="Designation"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="Designation title"
+            ></ion-input>
+          }
         </div>
 
         <div class="field">
@@ -437,13 +467,28 @@
         </div>
 
         <div class="field">
-          <ion-input
-            formControlName="workShift"
-            label="Work shift"
-            labelPlacement="floating"
-            fill="outline"
-            placeholder="General (9:30 – 18:30)"
-          ></ion-input>
+          @if (shifts().length) {
+            <ion-select
+              formControlName="workShift"
+              label="Work shift"
+              labelPlacement="floating"
+              fill="outline"
+              interface="popover"
+              placeholder="Select shift"
+            >
+              @for (shift of shifts(); track shift.id) {
+                <ion-select-option [value]="shift.name">{{ shift.name }} ({{ shift.startTime }} - {{ shift.endTime }})</ion-select-option>
+              }
+            </ion-select>
+          } @else {
+            <ion-input
+              formControlName="workShift"
+              label="Work shift"
+              labelPlacement="floating"
+              fill="outline"
+              placeholder="General (9:30 – 18:30)"
+            ></ion-input>
+          }
         </div>
 
         <div class="field">
