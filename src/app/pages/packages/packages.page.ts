@@ -157,7 +157,9 @@ export class PackagesPage implements OnInit {
   async handleDelete(packageItem: { id: string }): Promise<void> {
     await firstValueFrom(this.data.deletePackage({
       id: packageItem.id,
-    }))
+    }));
+    await this.reloadPackages();
+    this.closeModal();
   }
 
   logout(): void {
