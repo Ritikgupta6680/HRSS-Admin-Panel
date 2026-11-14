@@ -170,52 +170,48 @@ export class CallService {
   }
 
   createCompany(company: CreateCompanyRequest): Observable<CreateCompanyResponse> {
-    return this.post<CreateCompanyResponse>('/api/SuperAdmin/add-company', company);
+    return this.post<CreateCompanyResponse>('/api/SuperAdmin/companies', company);
   }
 
   createUser(user: CreateUserRequest): Observable<CreateUserResponse> {
-    return this.post<CreateUserResponse>('/api/SuperAdmin/company/add-user', user);
+    return this.post<CreateUserResponse>('/api/SuperAdmin/users', user);
   }
 
   /** Everything stored about one company, used by the detail and edit screens. */
   get_company_details(companyId: string): Observable<CompanyDetails> {
-    return this.get<unknown>(`/api/SuperAdmin/company?id=${companyId}`).pipe(
+    return this.get<unknown>(`/api/SuperAdmin/companies/${companyId}`).pipe(
       map((response) => this.toCompanyDetails(response)),
     );
   }
 
   updateCompany(companyId: string, company: CreateCompanyRequest): Observable<CompanyDetails> {
-    return this.post<CompanyDetails>('/api/SuperAdmin/update-company', {
+    return this.put<CompanyDetails>(`/api/SuperAdmin/companies/${companyId}`, {
       ...company,
       id: companyId,
     });
   }
 
   deleteCompany(companyId: string, reason: string = 'Deactivated by Super Admin'): Observable<void> {
-    return this.post<void>('/api/SuperAdmin/delete-company', {
-      id: companyId,
-      companyId,
-      reason,
-    });
+    return this.delete<void>(`/api/SuperAdmin/companies/${companyId}`);
   }
 
   /** Users belonging to one company. */
   get_company_users(companyId: string): Observable<CompanyUser[]> {
-    return this.get<unknown>(`/api/SuperAdmin/company/users?companyId=${companyId}`).pipe(
+    return this.get<unknown>(`/api/SuperAdmin/companies/${companyId}/users`).pipe(
       map((response) => this.toUserList(response)),
     );
   }
 
   get_user_details(userId: string): Observable<UserDetails> {
-    return this.get<UserDetails>(`/api/SuperAdmin/company/user?id=${userId}`);
+    return this.get<UserDetails>(`/api/SuperAdmin/users/${userId}`);
   }
 
   deleteUser(userId: string): Observable<void> {
-    return this.delete<void>(`/api/SuperAdmin/company/delete-user/${userId}`);
+    return this.delete<void>(`/api/SuperAdmin/users/${userId}`);
   }
 
   updateUser(userId: string, user: Omit<CreateUserRequest, 'password'>): Observable<UserDetails> {
-    return this.put<UserDetails>(`/api/SuperAdmin/company/update-user/${userId}`, user);
+    return this.put<UserDetails>(`/api/SuperAdmin/users/${userId}`, user);
   }
 
   getDepartments(companyId: string): Observable<{ id: string; name: string }[]> {

@@ -141,6 +141,10 @@ export class HomePage implements ViewWillEnter {
   expiryState(validTill: string): 'expired' | 'expiring' | 'active' {
     const days = this.daysLeft(validTill);
 
+    if (Number.isNaN(days)) {
+      return 'active';
+    }
+
     if (days < 0) {
       return 'expired';
     }
@@ -151,7 +155,7 @@ export class HomePage implements ViewWillEnter {
   expiryLabel(validTill: string): string {
     const days = this.daysLeft(validTill);
 
-    // The backend may omit the date entirely.
+    // The backend may omit the date entirely or send default 0001 date.
     if (Number.isNaN(days)) {
       return '—';
     }
@@ -185,6 +189,9 @@ export class HomePage implements ViewWillEnter {
   }
 
   private daysLeft(validTill: string): number {
+    if (!validTill || validTill.startsWith('0001') || isNaN(Date.parse(validTill))) {
+      return NaN;
+    }
     const end = new Date(validTill).setHours(0, 0, 0, 0);
     const today = new Date().setHours(0, 0, 0, 0);
 

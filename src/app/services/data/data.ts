@@ -30,19 +30,19 @@ export class Data {
   }
 
   getPackageById(id: string) {
-    return this.callService.get<PackageModel>(`/api/SuperAdmin/package/${id}`);
+    return this.callService.get<PackageModel>(`/api/SuperAdmin/packages/${id}`);
   }
 
   createPackage(payload: CreatePackageRequest) {
-    return this.callService.post('/api/SuperAdmin/create-package', payload);
+    return this.callService.post('/api/SuperAdmin/packages', payload);
   }
 
   updatePackage(payload: UpdatePackageRequest) {
-    return this.callService.post('/api/SuperAdmin/update-package', payload);
+    return this.callService.put(`/api/SuperAdmin/packages/${payload.id}`, payload);
   }
 
   deletePackage(payload: { id: string }) {
-    return this.callService.post(`/api/SuperAdmin/delete-package`, payload);
+    return this.callService.delete(`/api/SuperAdmin/packages/${payload.id}`);
   }
 
 }

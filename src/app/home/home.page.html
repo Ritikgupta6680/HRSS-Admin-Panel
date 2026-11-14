@@ -136,7 +136,7 @@
                   <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
                   Valid till
                 </dt>
-                <dd>{{ company.validTill | date: 'dd MMM yyyy' }}</dd>
+                <dd>{{ (company.validTill && !company.validTill.startsWith('0001')) ? (company.validTill | date: 'dd MMM yyyy') : '—' }}</dd>
               </div>
 
               <div class="meta-item">
@@ -144,7 +144,7 @@
                   <ion-icon name="cart-outline" aria-hidden="true"></ion-icon>
                   Purchased on
                 </dt>
-                <dd>{{ company.purchasedOn | date: 'dd MMM yyyy' }}</dd>
+                <dd>{{ (company.purchasedOn && !company.purchasedOn.startsWith('0001')) ? (company.purchasedOn | date: 'dd MMM yyyy') : '—' }}</dd>
               </div>
             </dl>
 
